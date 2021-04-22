@@ -22,7 +22,7 @@
     "sass-loader": "^11.0.1"
   },
   "scripts": {
-    "start": "node server.js",
+    "start": "react-scripts start",
     "dev": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
