@@ -1,4 +1,4 @@
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import {
     Button,
     Modal,
@@ -29,32 +29,50 @@ export function ModalRegister(props) {
     const [originAddress, setOriginAddress] = useState();
     const [originNumber, setOriginNumber] = useState();
     const [originState, setOriginState] = useState();
+    const [originCity, setOriginCity] = useState();
+
     const [destinationAddress, setDestinationAddress] = useState();
     const [destinationNumber, setDestinationNumber] = useState();
     const [destinationState, setDestinationState] = useState();
+    const [destinationCity, setDestinationCity] = useState();
 
     const [modal, setModal] = useState(false);
     const [clientName, setClientName] = useState();
     const [deliveryDate, setDeliveryDate] = useState();
 
-    const [latiduteOrigin, setLatitudeOrigin] = useState();
-    const [longitudeOrigin, setLongitudeOrigin] = useState();
-    const [latiduteDestination, setLatitudeDestination] = useState();
-    const [longitudeDestination, setLongitudeDestination] = useState();
 
     const toggle = () => setModal(!modal);
 
     const register = async (e) => {
         e.preventDefault();
 
+        let { latOrigin, lngOrigin, latDest, lngDest } =  await findAddress();
+
+        const delivery = {
+            client_name: clientName,
+            delivery_date: deliveryDate,
+            starting_latitude: latOrigin.toString(),
+            starting_longitude: lngOrigin.toString(),
+            destination_latitude: latDest.toString(),
+            destination_longitude: lngDest.toString()
+        }
+
+        console.log(delivery);
+        send(delivery);
+
+    }
+
+    const findAddress = async (e) => {
+
+        let latOrigin, lngOrigin, latDest, lngDest;
         // Consultar dados do endereço de partida
         try {
             const response = await mapsApi.get(
-                `json?address=${originAddress.replace(" ", "+")},+${originNumber}+${originState}&key=${process.env.REACT_APP_API_KEY}`);
-            console.log(response);
+                `json?address=${originAddress.replace(" ", "+")},+${originNumber}+${originCity},${originState}&key=${process.env.REACT_APP_API_KEY}`);
+
             const { lat, lng } = response.data.results[0].geometry.location;
-            setLatitudeOrigin(lat);
-            setLongitudeOrigin(lng);
+            latOrigin = lat;
+            lngOrigin = lng;
         } catch (err) {
             console.log(err)
         }
@@ -62,31 +80,16 @@ export function ModalRegister(props) {
         // Consultar dados do endereço de destino
         try {
             const response = await mapsApi.get(
-                `json?address=${destinationAddress.replace(" ", "+")},+${destinationNumber}+${destinationState}&key=${process.env.REACT_APP_API_KEY}`);
-            console.log(response);
+                `json?address=${destinationAddress.replace(" ", "+")},+${destinationNumber}+${destinationCity},${destinationState}&key=${process.env.REACT_APP_API_KEY}`);
+
             const { lat, lng } = response.data.results[0].geometry.location;
-            setLatitudeDestination(lat);
-            setLongitudeDestination(lng);
+            latDest = lat;
+            lngDest = lng;
         } catch (err) {
             console.log(err)
         }
 
-        // if (latiduteOrigin !== '') {
-        // Define o objeto para salvar no banco
-        const delivery = {
-            client_name: clientName,
-            delivery_date: deliveryDate,
-            starting_latitude: latiduteOrigin.toString(),
-            starting_longitude: longitudeOrigin.toString(),
-            destination_latitude: latiduteDestination.toString(),
-            destination_longitude: longitudeDestination.toString()
-        }
-        console.log(delivery);
-        send(delivery);
-        // } else {
-        // modalError("Não foi possível capturar o endereço, por favor tentar novamente!");
-        // }
-
+        return { latOrigin, lngOrigin, latDest, lngDest };
     }
 
     // Envia os dados do delivery para a api de entregas
@@ -113,7 +116,7 @@ export function ModalRegister(props) {
     return (
         <div>
             <Button color="danger" onClick={toggle}>{buttonLabel}</Button>
-            <Modal isOpen={modal} toggle={toggle} className={className}>
+            <Modal isOpen={modal} toggle={toggle} className={className} size="xl">
                 <ModalHeader toggle={toggle}>Adicionar Entrega</ModalHeader>
                 <ModalBody>
                     <Form onSubmit={register}>
@@ -167,7 +170,13 @@ export function ModalRegister(props) {
                                     required
                                 />
                                 <Input
-                                    className="col-2 originState"
+                                    className="col-2 originCity"
+                                    placeholder="Fortaleza"
+                                    onChange={(e) => { setOriginCity(e.target.value) }}
+                                    required
+                                />
+                                <Input
+                                    className="col-2 originState mx-1"
                                     placeholder="CE"
                                     maxLength="2"
                                     onChange={(e) => { setOriginState(e.target.value) }}
@@ -177,6 +186,8 @@ export function ModalRegister(props) {
                             </InputGroup>
                             <br />
                         </FormGroup>
+
+                        <hr />
 
                         <FormGroup>
                             <InputGroup>
@@ -196,49 +207,20 @@ export function ModalRegister(props) {
                                     required
                                 />
                                 <Input
-                                    className="col-2 destinationState"
+                                    className="col-2 destinationCity"
+                                    placeholder="Fortaleza"
+                                    onChange={(e) => { setDestinationCity(e.target.value) }}
+                                    required
+                                />
+                                <Input
+                                    className="col-2 destinationState mx-1"
                                     placeholder="CE"
                                     maxLength="2"
                                     onChange={(e) => { setDestinationState(e.target.value) }}
                                     required
                                     style={{textTransform: 'uppercase'}}
                                 />
-                                {/* <select 
-                                    name="estados-brasil"
-                                    onChange={(e) => { setDestinationState(e.change) }}
-                                    
-                                    className="col-3 destinationState custom-select"
-                                    defaultValue=""
-                                    required
-                                >
-                                    <option value="AC" >Acre</option>
-                                    <option value="AL" >Alagoas</option>
-                                    <option value="AP" >Amapá</option>
-                                    <option value="AM" >Amazonas</option>
-                                    <option value="BA" >Bahia</option>
-                                    <option value="CE" >Ceará</option>
-                                    <option value="DF" >Distrito Federal</option>
-                                    <option value="ES" >Espírito Santo</option>
-                                    <option value="GO" >Goiás</option>
-                                    <option value="MA" >Maranhão</option>
-                                    <option value="MT" >Mato Grosso</option>
-                                    <option value="MS" >Mato Grosso do Sul</option>
-                                    <option value="MG" >Minas Gerais</option>
-                                    <option value="PA" >Pará</option>
-                                    <option value="PB" >Paraíba</option>
-                                    <option value="PR" >Paraná</option>
-                                    <option value="PE" >Pernambuco</option>
-                                    <option value="PI" >Piauí</option>
-                                    <option value="RJ" >Rio de Janeiro</option>
-                                    <option value="RN" >Rio Grande do Norte</option>
-                                    <option value="RS" >Rio Grande do Sul</option>
-                                    <option value="RO" >Rondônia</option>
-                                    <option value="RR" >Roraima</option>
-                                    <option value="SC" >Santa Catarina</option>
-                                    <option value="SP" >São Paulo</option>
-                                    <option value="SE" >Sergipe</option>
-                                    <option value="TO" >Tocantins</option>
-                                </select> */}
+                                
                             </InputGroup>
                             <br />
                         </FormGroup>

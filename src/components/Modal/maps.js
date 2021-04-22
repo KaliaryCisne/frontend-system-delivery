@@ -8,7 +8,6 @@ import {
 import GoogleMaps from "../Map";
 
 export function ModalMap(props) {
-    console.log(props)
     const [modal, setModal] = useState(false);
 
     const {
