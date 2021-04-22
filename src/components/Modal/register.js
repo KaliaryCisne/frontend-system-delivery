@@ -82,7 +82,7 @@ export function ModalRegister(props) {
             destination_longitude: longitudeDestination.toString()
         }
         console.log(delivery);
-        // send(delivery);
+        send(delivery);
         // } else {
         // modalError("Não foi possível capturar o endereço, por favor tentar novamente!");
         // }
