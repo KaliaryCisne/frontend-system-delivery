@@ -1,0 +1,13 @@
+header {
+    font-weight: bold;
+    color: #fff;
+
+    nav {
+        display: flex;
+        flex-direction: row-reverse;
+
+        .title {
+            margin-top: 5px;
+        }
+    }
+}

@@ -1,25 +1,18 @@
-import logo from './logo.svg';
-import './App.css';
+import { Header } from "./components/Header"
+import { List } from "./components/List";
+import { RefreshPage } from "./context/RefreshPage";
+import { ModalRegister } from "./components/Modal/register";
 
-function App() {
+import './styles/global.scss';
+
+export function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <RefreshPage>
+      <Header />
+      <div className="container-fluid mt-5">
+      <List />
+      <ModalRegister buttonLabel="Adicionar" className=""/>
+      </div>
+    </RefreshPage >
   );
 }
-
-export default App;
